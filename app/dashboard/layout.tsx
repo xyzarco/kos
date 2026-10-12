@@ -43,7 +43,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </button>
       </header>
       <main className="mx-auto w-full max-w-2xl px-4 py-5 pb-24">{children}</main>
-      <nav className="fixed inset-x-0 bottom-0 z-10 grid grid-cols-4 border-t border-zinc-200 bg-white/95 backdrop-blur">
+      <nav className="fixed inset-x-0 bottom-0 z-10 grid grid-cols-3 border-t border-zinc-200 bg-white/95 backdrop-blur">
         {TABS.map(t => (
           <Link
             key={t.href}
