@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Building2, BedDouble, Plus, Trash2, DoorOpen, Wrench } from "lucide-react";
 
 type Room = { id: string; code: string; type: string | null; basePrice: number; status: string; propertyId: string };
 type Property = { id: string; name: string };
 
 const rupiah = (n: number) => "Rp " + n.toLocaleString("id-ID");
-const STATUS_STYLE: Record<string, string> = {
-  kosong: "bg-zinc-100 text-zinc-600",
-  terisi: "bg-teal-50 text-teal-700",
-  perbaikan: "bg-amber-50 text-amber-700",
+const STATUS_STYLE: Record<string, { cls: string; Icon: typeof DoorOpen }> = {
+  kosong: { cls: "bg-zinc-100 text-zinc-600", Icon: DoorOpen },
+  terisi: { cls: "bg-teal-50 text-teal-700", Icon: BedDouble },
+  perbaikan: { cls: "bg-amber-50 text-amber-700", Icon: Wrench },
 };
 
 const input = "w-full rounded-xl border border-zinc-300 bg-white px-3.5 py-2.5 text-base outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20";
@@ -64,11 +65,11 @@ export default function RoomsPage() {
   return (
     <div className="space-y-4">
       <div className={card}>
-        <h2 className="mb-3 font-semibold">Tambah properti</h2>
+        <h2 className="mb-3 flex items-center gap-1.5 font-semibold"><Building2 size={16} className="text-zinc-400" /> Tambah properti</h2>
         <div className="flex gap-2">
           <input className={input} placeholder="Nama properti (mis. Kost Melati)" value={newProp}
             onChange={e => setNewProp(e.target.value)} />
-          <button onClick={addProperty} className="shrink-0 rounded-xl bg-teal-700 px-4 font-semibold text-white hover:bg-teal-800">Tambah</button>
+          <button onClick={addProperty} className="flex shrink-0 items-center gap-1 rounded-xl bg-teal-700 px-4 font-semibold text-white hover:bg-teal-800"><Plus size={16} /> Tambah</button>
         </div>
         {props.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2">
@@ -80,7 +81,7 @@ export default function RoomsPage() {
       </div>
 
       <form onSubmit={addRoom} className={card + " space-y-3"}>
-        <h2 className="font-semibold">Tambah kamar</h2>
+        <h2 className="flex items-center gap-1.5 font-semibold"><BedDouble size={16} className="text-zinc-400" /> Tambah kamar</h2>
         {props.length === 0 ? (
           <p className="text-sm text-zinc-500">Tambahkan properti dulu.</p>
         ) : (
@@ -104,25 +105,31 @@ export default function RoomsPage() {
       </form>
 
       <div className={card}>
-        <h2 className="mb-2 font-semibold">Daftar kamar <span className="text-sm font-normal tabular-nums text-zinc-400">({rooms.length})</span></h2>
+        <h2 className="mb-2 flex items-center gap-1.5 font-semibold"><DoorOpen size={16} className="text-zinc-400" /> Daftar kamar <span className="text-sm font-normal tabular-nums text-zinc-400">({rooms.length})</span></h2>
         {rooms.length === 0 ? (
           <p className="text-sm text-zinc-500">Belum ada kamar.</p>
         ) : (
           <ul className="divide-y divide-zinc-100">
-            {rooms.map(r => (
+            {rooms.map(r => {
+              const st = STATUS_STYLE[r.status];
+              return (
               <li key={r.id} className="flex items-center justify-between gap-3 py-3">
-                <div className="min-w-0">
-                  <p className="font-medium">Kamar {r.code}</p>
-                  <p className="truncate text-xs text-zinc-500">
-                    {props.find(p => p.id === r.propertyId)?.name}{r.type ? ` · ${r.type}` : ""} · {rupiah(r.basePrice)}
-                  </p>
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${st.cls}`}><st.Icon size={16} /></span>
+                  <div className="min-w-0">
+                    <p className="font-medium">Kamar {r.code}</p>
+                    <p className="truncate text-xs text-zinc-500">
+                      {props.find(p => p.id === r.propertyId)?.name}{r.type ? ` · ${r.type}` : ""} · {rupiah(r.basePrice)}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_STYLE[r.status]}`}>{r.status}</span>
-                  <button onClick={() => remove(r.id)} className="rounded-lg p-2 text-zinc-400 hover:bg-red-50 hover:text-red-600" aria-label={`Hapus kamar ${r.code}`}>✕</button>
+                  <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${st.cls}`}>{r.status}</span>
+                  <button onClick={() => remove(r.id)} className="rounded-lg p-2 text-zinc-400 hover:bg-red-50 hover:text-red-600" aria-label={`Hapus kamar ${r.code}`}><Trash2 size={16} /></button>
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </div>

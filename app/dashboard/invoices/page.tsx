@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ReceiptText, Plus, ExternalLink, RefreshCcw, Send, CheckCircle2, Clock, XCircle, CalendarClock } from "lucide-react";
 
 type Invoice = {
   id: string; period: string; dueDate: string; total: number; paidAmount: number;
@@ -18,12 +19,12 @@ const STATUS: Record<string, string> = {
   terlambat: "bg-red-50 text-red-700", dibatalkan: "bg-zinc-100 text-zinc-500",
 };
 
-const LINK_STATUS: Record<string, { label: string; cls: string }> = {
-  none: { label: "tanpa link", cls: "bg-zinc-100 text-zinc-500" },
-  pending: { label: "link aktif · menunggu bayar", cls: "bg-blue-50 text-blue-700" },
-  paid: { label: "link terbayar", cls: "bg-teal-50 text-teal-700" },
-  expired: { label: "link expired", cls: "bg-red-50 text-red-700" },
-  cancelled: { label: "link dibatalkan", cls: "bg-amber-50 text-amber-700" },
+const LINK_STATUS: Record<string, { label: string; cls: string; Icon: typeof Clock }> = {
+  none: { label: "tanpa link", cls: "bg-zinc-100 text-zinc-500", Icon: XCircle },
+  pending: { label: "link aktif · menunggu bayar", cls: "bg-blue-50 text-blue-700", Icon: Clock },
+  paid: { label: "link terbayar", cls: "bg-teal-50 text-teal-700", Icon: CheckCircle2 },
+  expired: { label: "link expired", cls: "bg-red-50 text-red-700", Icon: XCircle },
+  cancelled: { label: "link dibatalkan", cls: "bg-amber-50 text-amber-700", Icon: XCircle },
 };
 
 export default function InvoicesPage() {
@@ -67,7 +68,7 @@ export default function InvoicesPage() {
   return (
     <div className="space-y-4">
       <form onSubmit={createInvoice} className={card + " space-y-3"}>
-        <h2 className="font-semibold">Buat tagihan</h2>
+        <h2 className="flex items-center gap-1.5 font-semibold"><Plus size={16} className="text-zinc-400" /> Buat tagihan</h2>
         {tenancies.length === 0 ? (
           <p className="text-sm text-zinc-500">Belum ada kontrak aktif.</p>
         ) : (
@@ -88,7 +89,7 @@ export default function InvoicesPage() {
       </form>
 
       <div className={card}>
-        <h2 className="mb-2 font-semibold">Daftar tagihan <span className="text-sm font-normal tabular-nums text-zinc-400">({invoices.length})</span></h2>
+        <h2 className="mb-2 flex items-center gap-1.5 font-semibold"><ReceiptText size={16} className="text-zinc-400" /> Daftar tagihan <span className="text-sm font-normal tabular-nums text-zinc-400">({invoices.length})</span></h2>
         {invoices.length === 0 ? <p className="text-sm text-zinc-500">Belum ada tagihan.</p> : (
           <ul className="divide-y divide-zinc-100">
             {invoices.map(inv => (
@@ -101,15 +102,18 @@ export default function InvoicesPage() {
                   </div>
                   <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${STATUS[inv.status]}`}>{inv.status}</span>
                 </div>
-                {inv.status !== "lunas" && inv.linkStatus && inv.linkStatus !== "none" && (
-                  <span className={`mt-2 inline-block rounded-full px-2.5 py-1 text-xs font-medium ${LINK_STATUS[inv.linkStatus]?.cls ?? "bg-zinc-100"}`}>
-                    {LINK_STATUS[inv.linkStatus]?.label ?? inv.linkStatus}
-                  </span>
-                )}
+                {inv.status !== "lunas" && inv.linkStatus && inv.linkStatus !== "none" && (() => {
+                  const ls = LINK_STATUS[inv.linkStatus];
+                  return ls ? (
+                    <span className={`mt-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${ls.cls}`}>
+                      <ls.Icon size={12} /> {ls.label}
+                    </span>
+                  ) : null;
+                })()}
                 <div className="mt-2 flex flex-wrap gap-2 text-xs font-medium">
                   {inv.paymentLink && (
                     <a href={`/pay/${inv.publicToken}`} target="_blank"
-                      className="rounded-lg bg-teal-50 px-2.5 py-1.5 text-teal-700 hover:bg-teal-100">Lihat halaman bayar ↗</a>
+                      className="inline-flex items-center gap-1 rounded-lg bg-teal-50 px-2.5 py-1.5 text-teal-700 hover:bg-teal-100"><ExternalLink size={12} /> Lihat halaman bayar</a>
                   )}
                   {inv.status !== "lunas" && (inv.linkStatus === "expired" || inv.linkStatus === "cancelled" || inv.linkStatus === "none") && (
                     <button onClick={async () => {
@@ -119,14 +123,14 @@ export default function InvoicesPage() {
                       });
                       const d = await r.json();
                       if (r.ok) { load(); } else { alert(d.error ?? "Gagal"); }
-                    }} className="rounded-lg bg-amber-50 px-2.5 py-1.5 text-amber-700 hover:bg-amber-100">
-                      Buat link baru
+                    }} className="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-2.5 py-1.5 text-amber-700 hover:bg-amber-100">
+                      <RefreshCcw size={12} /> Buat link baru
                     </button>
                   )}
-                  <button onClick={() => sendWa(inv.id, "tagihan")} className="rounded-lg bg-zinc-100 px-2.5 py-1.5 hover:bg-zinc-200">WA: tagihan terbit</button>
-                  <button onClick={() => sendWa(inv.id, "pengingat")} className="rounded-lg bg-zinc-100 px-2.5 py-1.5 hover:bg-zinc-200">WA: pengingat</button>
+                  <button onClick={() => sendWa(inv.id, "tagihan")} className="inline-flex items-center gap-1 rounded-lg bg-zinc-100 px-2.5 py-1.5 hover:bg-zinc-200"><Send size={12} /> WA: tagihan terbit</button>
+                  <button onClick={() => sendWa(inv.id, "pengingat")} className="inline-flex items-center gap-1 rounded-lg bg-zinc-100 px-2.5 py-1.5 hover:bg-zinc-200"><CalendarClock size={12} /> WA: pengingat</button>
                   {inv.status === "lunas" && (
-                    <button onClick={() => sendWa(inv.id, "diterima")} className="rounded-lg bg-zinc-100 px-2.5 py-1.5 hover:bg-zinc-200">WA: pembayaran diterima</button>
+                    <button onClick={() => sendWa(inv.id, "diterima")} className="inline-flex items-center gap-1 rounded-lg bg-zinc-100 px-2.5 py-1.5 hover:bg-zinc-200"><CheckCircle2 size={12} /> WA: pembayaran diterima</button>
                   )}
                 </div>
               </li>

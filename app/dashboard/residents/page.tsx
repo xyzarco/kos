@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Users, UserPlus, FileSignature, Trash2, Phone, ShieldCheck } from "lucide-react";
 
 type Resident = { id: string; name: string; waNumber: string; emergencyContact: string | null; waOptInAt: string | null };
 type Room = { id: string; code: string; basePrice: number; status: string };
@@ -61,7 +62,7 @@ export default function ResidentsPage() {
   return (
     <div className="space-y-4">
       <form onSubmit={addResident} className={card + " space-y-3"}>
-        <h2 className="font-semibold">Tambah penghuni</h2>
+        <h2 className="flex items-center gap-1.5 font-semibold"><UserPlus size={16} className="text-zinc-400" /> Tambah penghuni</h2>
         <div>
           <span className={label}>Nama</span>
           <input className={input} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required />
@@ -79,13 +80,14 @@ export default function ResidentsPage() {
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" className="h-4 w-4 accent-teal-700" checked={form.optIn}
             onChange={e => setForm({ ...form, optIn: e.target.checked })} />
+          <ShieldCheck size={14} className="text-teal-700" />
           Setuju menerima reminder tagihan via WhatsApp
         </label>
         <button className="min-h-12 w-full rounded-xl bg-teal-700 font-semibold text-white hover:bg-teal-800">Simpan penghuni</button>
       </form>
 
       <form onSubmit={addContract} className={card + " space-y-3"}>
-        <h2 className="font-semibold">Buat kontrak sewa</h2>
+        <h2 className="flex items-center gap-1.5 font-semibold"><FileSignature size={16} className="text-zinc-400" /> Buat kontrak sewa</h2>
         {residents.length === 0 || kamarKosong.length === 0 ? (
           <p className="text-sm text-zinc-500">Butuh minimal 1 penghuni dan 1 kamar berstatus <em>kosong</em>.</p>
         ) : (
@@ -135,16 +137,21 @@ export default function ResidentsPage() {
       </form>
 
       <div className={card}>
-        <h2 className="mb-2 font-semibold">Penghuni <span className="text-sm font-normal tabular-nums text-zinc-400">({residents.length})</span></h2>
+        <h2 className="mb-2 flex items-center gap-1.5 font-semibold"><Users size={16} className="text-zinc-400" /> Penghuni <span className="text-sm font-normal tabular-nums text-zinc-400">({residents.length})</span></h2>
         {residents.length === 0 ? <p className="text-sm text-zinc-500">Belum ada penghuni.</p> : (
           <ul className="divide-y divide-zinc-100">
             {residents.map(r => (
               <li key={r.id} className="flex items-center justify-between gap-3 py-3">
-                <div className="min-w-0">
-                  <p className="font-medium">{r.name}</p>
-                  <p className="text-xs text-zinc-500">{r.waNumber}{r.waOptInAt ? " · opt-in WA ✓" : ""}</p>
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-50 text-sm font-semibold text-teal-700">
+                    {r.name.slice(0, 1).toUpperCase()}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-medium">{r.name}</p>
+                    <p className="flex items-center gap-1 text-xs text-zinc-500"><Phone size={11} /> {r.waNumber}{r.waOptInAt ? " · opt-in WA" : ""}</p>
+                  </div>
                 </div>
-                <button onClick={() => remove(r.id)} className="rounded-lg p-2 text-zinc-400 hover:bg-red-50 hover:text-red-600" aria-label={`Hapus ${r.name}`}>✕</button>
+                <button onClick={() => remove(r.id)} className="rounded-lg p-2 text-zinc-400 hover:bg-red-50 hover:text-red-600" aria-label={`Hapus ${r.name}`}><Trash2 size={16} /></button>
               </li>
             ))}
           </ul>
@@ -152,14 +159,17 @@ export default function ResidentsPage() {
       </div>
 
       <div className={card}>
-        <h2 className="mb-2 font-semibold">Kontrak sewa</h2>
+        <h2 className="mb-2 flex items-center gap-1.5 font-semibold"><FileSignature size={16} className="text-zinc-400" /> Kontrak sewa</h2>
         {tenancies.length === 0 ? <p className="text-sm text-zinc-500">Belum ada kontrak.</p> : (
           <ul className="divide-y divide-zinc-100">
             {tenancies.map(t => (
               <li key={t.id} className="flex items-center justify-between py-3">
-                <div>
-                  <p className="font-medium">{t.residentName} · Kamar {t.roomCode}</p>
-                  <p className="text-xs text-zinc-500">Sejak {t.startDate} · tagih tgl {"..."} · {t.status}</p>
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-600"><FileSignature size={15} /></span>
+                  <div>
+                    <p className="font-medium">{t.residentName} · Kamar {t.roomCode}</p>
+                    <p className="text-xs text-zinc-500">Sejak {t.startDate} · tagih tgl {"..."} · {t.status}</p>
+                  </div>
                 </div>
                 <span className="text-sm font-medium tabular-nums">{rupiah(t.rentAmount)}</span>
               </li>
